@@ -20,7 +20,7 @@ bl_info = {
         "name": "ObLib",
         "description":"Object Librarian",
         "author":"Shams Kitz",
-        "version":(0,1),
+        "version":(0,2),
         "blender":(2,80,0),
         "location":"3d Viewport UI",
         "warning":"",
@@ -222,7 +222,10 @@ class OBLIB_OT_load_object(bpy.types.Operator):
         with bpy.data.libraries.load(blend) as (data_from,data_to):
             data_to.objects = [objname]
         obj = data_to.objects[0]
-        print("obj:",obj)
+        context.scene.collection.objects.link(obj)
+        loc_v,rot_q,scale_v = context.scene.cursor.matrix.decompose()
+        rot_v = rot_q.to_euler()
+        obj.location,obj.rotation_euler,obj.scale = loc_v,rot_v,scale_v
         #now what
         return {"FINISHED"}
 
@@ -299,9 +302,14 @@ class OBLIB_MT_objs_menu(bpy.types.Menu):
     def draw(self,context):
         i = -1
         for i,obj in db.cx.objects:
-            self.layout.operator("oblib.load_object",text=obj,icon=["TRIA_RIGHT","FF"][obj in bpy.data.objects]).obj_id = i
+            self.layout.operator(
+                "oblib.load_object",
+                text=obj,
+                icon=["TRIA_RIGHT","FF"][obj in bpy.data.objects]).obj_id = i
         if i == -1 and db.cx.active_path:
-            self.layout.label(text="No objects found in any blends in path:%s!"%db.cx.path(db.cx.active_path))
+            self.layout.label(
+                text="No objects found in any blends in path:%s!"%db.cx.path(
+                    db.cx.active_path))
 
 
 @_
@@ -326,13 +334,20 @@ class OBLIB_MT_main_menu(bpy.types.Menu):
 
 
 def header_draw(self,context):
-    print("context.area.spaces.active.context:",context.area.spaces.active.context)
     if context.area.spaces.active.context == "OBJECT":
         layout = self.layout.row(align=True)
         layout.menu("OBLIB_MT_main_menu",text="",icon="THREE_DOTS")
 
 def register():
     list(map(bpy.utils.register_class,_()))
+    km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(
+        "3D View",space_type="VIEW_3D")
+    kmi = km.keymap_items.new(
+        "WM_OT_call_menu","A","PRESS",ctrl=True,alt=True,shift=True)
+    kmi.properties.name = "OBLIB_MT_objs_menu"
+    kmi = km.keymap_items.new(
+        "OBLIB_OT_send_object","Z","PRESS",ctrl=True,alt=True,shift=True)
+
     bpy.types.PROPERTIES_HT_header.append(header_draw)
     ap = db.cx.active_path
     if ap:
