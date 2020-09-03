@@ -210,7 +210,7 @@ class OBLIB_OT_send_object(bpy.types.Operator):
 class OBLIB_OT_load_object(bpy.types.Operator):
     bl_idname = "oblib.load_object"
     bl_label = "Load Object"
-    bl_options = {"INTERNAL"}
+    bl_options = {"INTERNAL","REGISTER"}
     obj_id: bpy.props.IntProperty()
     def execute(self,context):
         print("loading object",self.obj_id)
@@ -222,11 +222,12 @@ class OBLIB_OT_load_object(bpy.types.Operator):
         with bpy.data.libraries.load(blend) as (data_from,data_to):
             data_to.objects = [objname]
         obj = data_to.objects[0]
+        # xxx-todo make this optional
         context.scene.collection.objects.link(obj)
+        # xxx-todo and then also make this optional
         loc_v,rot_q,scale_v = context.scene.cursor.matrix.decompose()
         rot_v = rot_q.to_euler()
         obj.location,obj.rotation_euler,obj.scale = loc_v,rot_v,scale_v
-        #now what
         return {"FINISHED"}
 
 
@@ -332,30 +333,30 @@ class OBLIB_MT_main_menu(bpy.types.Menu):
                 "OBLIB_MT_path_menu",
                 icon="FILEBROWSER")
 
-
-def header_draw(self,context):
-    if context.area.spaces.active.context == "OBJECT":
-        layout = self.layout.row(align=True)
-        layout.menu("OBLIB_MT_main_menu",text="",icon="THREE_DOTS")
+addon_keymaps = []
 
 def register():
+    addon_keymaps.clear()
     list(map(bpy.utils.register_class,_()))
     km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(
         "3D View",space_type="VIEW_3D")
+    
     kmi = km.keymap_items.new(
         "WM_OT_call_menu","A","PRESS",ctrl=True,alt=True,shift=True)
     kmi.properties.name = "OBLIB_MT_objs_menu"
+    addon_keymaps.append((km,kmi))
     kmi = km.keymap_items.new(
         "OBLIB_OT_send_object","Z","PRESS",ctrl=True,alt=True,shift=True)
-
-    bpy.types.PROPERTIES_HT_header.append(header_draw)
+    addon_keymaps.append((km,kmi))
     ap = db.cx.active_path
     if ap:
         db.cx.prune_gone_blends(ap)
         db.cx.commit()
 
 def unregister():
-    bpy.utils.previews.remove(icons_d)
-    bpy.types.PROPERTIES_PT_navigation_bar.remove(header_draw)
+    for km,kmi in addon_keymaps:
+        km.keymap_items.remove(kmi)
+    addon_keymaps.clear()
     list(map(bpy.utils.unregister_class,_()))
+
 
