@@ -1,4 +1,4 @@
-# ##### BEGIN GPL LICENSE BLOCK #####
+# ##### BEGIN GPL LICENSE BLOCK #####{{{
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -14,9 +14,9 @@
 #  along with this program; if not, write to the Free Software Foundation,
 #  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110 - 1301, USA.
 #
-# ##### END GPL LICENSE BLOCK #####
+# ##### END GPL LICENSE BLOCK #####}}}
 
-bl_info = {
+bl_info = {# {{{
         "name": "ObLib",
         "description":"Object Librarian",
         "author":"Shams Kitz",
@@ -27,7 +27,7 @@ bl_info = {
         "wiki_url":"",
         "tracker_url":"https://github.com/dustractor/oblib.git",
         "category": "Object"
-        }
+        }# }}}
 
 import sqlite3
 import pathlib
@@ -295,20 +295,20 @@ class OBLIB_MT_path_menu(bpy.types.Menu):
         layout.separator()
         layout.operator("oblib.add_path").directory = ""
 
-
 @_
 class OBLIB_MT_objs_menu(bpy.types.Menu):
     bl_label = "Object Selector"
     bl_description = "Menu of Objects"
     def draw(self,context):
+        layout = self.layout
         i = -1
         for i,obj in db.cx.objects:
-            self.layout.operator(
+            layout.operator(
                 "oblib.load_object",
                 text=obj,
                 icon=["TRIA_RIGHT","FF"][obj in bpy.data.objects]).obj_id = i
         if i == -1 and db.cx.active_path:
-            self.layout.label(
+            layout.label(
                 text="No objects found in any blends in path:%s!"%db.cx.path(
                     db.cx.active_path))
 
@@ -318,29 +318,36 @@ class OBLIB_MT_main_menu(bpy.types.Menu):
     bl_label = "Librarian"
     bl_description = "ObLib Main Menu"
     def draw(self,context):
+        layout = self.layout
+        col = layout.column()
+        col.operator_context = "INVOKE_DEFAULT"
         if context.active_object != None:
             has_name = context.active_object.name in db.cx.object_names()
         else:
             has_name = False
-        op = self.layout.operator(
+        op = col.operator(
                 "oblib.send_object",
                 emboss=not has_name,
                 icon=["FORWARD","FILE_TICK"][has_name])
-        self.layout.menu(
+        col.menu(
                 "OBLIB_MT_objs_menu",
                 icon="PLUGIN")
-        self.layout.menu(
+        col.menu(
                 "OBLIB_MT_path_menu",
                 icon="FILEBROWSER")
 
 addon_keymaps = []
 
 def register():
-    addon_keymaps.clear()
     list(map(bpy.utils.register_class,_()))
+
+    bpy.types.VIEW3D_MT_object_context_menu.append(OBLIB_MT_main_menu.draw)
+
+    addon_keymaps.clear()
     km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(
         "3D View",space_type="VIEW_3D")
     
+
     kmi = km.keymap_items.new(
         "WM_OT_call_menu","A","PRESS",ctrl=True,alt=True,shift=True)
     kmi.properties.name = "OBLIB_MT_objs_menu"
