@@ -232,24 +232,40 @@ class OBLIB_OT_load_object(bpy.types.Operator):
 
 
 @_
+class OBLIB_OT_remove_path(bpy.types.Operator):
+    bl_idname = "oblib.remove_path"
+    bl_label = "Remove Path"
+    bl_options = {"INTERNAL"}
+    bl_description = "Remove a Library Path from the Oblib Database"
+    path_id: bpy.props.IntProperty(default=-1)
+    def invoke(self,context,event):
+        if self.path_id < 0:
+            return {"CANCELLED"}
+        print(self,"confirming deletion of path ",self.path_id)
+        return context.window_manager.invoke_confirm(self,event)
+    def execute(self,context):
+        print("removing path:",db.cx.path(self.path_id))
+        db.cx.execute("delete from paths where id=?",(self.path_id,))
+        db.cx.commit()
+        return {"FINISHED"}
+
+@_
 class OBLIB_OT_select_path(bpy.types.Operator):
     bl_idname = "oblib.select_path"
     bl_label = "Select Path"
     bl_options = {"INTERNAL"}
-    bl_description = "hold shift to open in file browser"
+    bl_description = "hold shift to open in file browser or alt to remove"
     path_id: bpy.props.IntProperty()
     def invoke(self,context,event):
         if event.shift:
             path = db.cx.path(self.path_id)
             if path:
-                bpy.ops.wm.path_open(filepath=path)
-                return {"FINISHED"}
+                return bpy.ops.wm.path_open(filepath=path)
             else:
                 return {"CANCELLED"}
         elif event.alt:
-            db.cx.execute("delete from paths where id=?",(self.path_id,))
-            db.cx.commit()
-            return {"FINISHED"}
+            return bpy.ops.oblib.remove_path(
+                "INVOKE_DEFAULT",path_id=self.path_id)
         return self.execute(context)
     def execute(self,context):
         print("selecting path",self.path_id)
@@ -335,25 +351,67 @@ class OBLIB_MT_main_menu(bpy.types.Menu):
         col.menu(
                 "OBLIB_MT_path_menu",
                 icon="FILEBROWSER")
+        ap = db.cx.active_path
+        apn = db.cx.path(ap)
+        if apn:
+            col.operator("oblib.remove_path",text="Remove "+apn).path_id = ap
+
+
+@_
+class OBLIB_PT_panel(bpy.types.Panel):
+    bl_label = "oblib"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "WINDOW"
+    def draw(self,context):
+        layout = self.layout
+        row = layout.row()
+        ap = db.cx.active_path
+        name = db.cx.path(ap)
+        if name:
+            label = "Object Library: " + pathlib.Path(name).stem
+        else:
+            label = "-No Library-"
+        row.label(text=label)
+        OBLIB_MT_main_menu.draw(self,context)
+
+
+@_
+class OblibAddon(bpy.types.AddonPreferences):
+    bl_idname = __package__
+    def draw(self,context):
+        layout = self.layout
+
 
 addon_keymaps = []
 
 def register():
     list(map(bpy.utils.register_class,_()))
-
     bpy.types.VIEW3D_MT_object_context_menu.append(OBLIB_MT_main_menu.draw)
-
     addon_keymaps.clear()
     km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(
         "3D View",space_type="VIEW_3D")
-    
-
-    kmi = km.keymap_items.new(
-        "WM_OT_call_menu","A","PRESS",ctrl=True,alt=True,shift=True)
+    kmi = km.keymap_items.new("WM_OT_call_menu",
+                              "A",
+                              "PRESS",
+                              ctrl=True,
+                              alt=True,
+                              shift=True)
     kmi.properties.name = "OBLIB_MT_objs_menu"
     addon_keymaps.append((km,kmi))
-    kmi = km.keymap_items.new(
-        "OBLIB_OT_send_object","Z","PRESS",ctrl=True,alt=True,shift=True)
+    kmi = km.keymap_items.new("WM_OT_call_panel",
+                              "Z",
+                              "PRESS",
+                              ctrl=True,
+                              alt=True,
+                              shift=True)
+    kmi.properties.name = "OBLIB_PT_panel"
+    addon_keymaps.append((km,kmi))
+    kmi = km.keymap_items.new("OBLIB_OT_send_object",
+                              "N",
+                              "PRESS",
+                              ctrl=True,
+                              alt=True,
+                              shift=True)
     addon_keymaps.append((km,kmi))
     ap = db.cx.active_path
     if ap:
