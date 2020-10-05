@@ -49,7 +49,7 @@
 
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## A very minimalist 'asset manager' addon for saving and loading objects organized by folder.
 
 [![Product Name Screen Shot][product-screenshot]](https://tkit.life)
 
