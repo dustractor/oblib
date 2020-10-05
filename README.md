@@ -117,12 +117,12 @@ Shams Kitz - [@shams13013](https://twitter.com/shams13013) - dustractor@gmail.co
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/dustractor/repo.svg?style=flat-square
 [contributors-url]: https://github.com/dustractor/repo/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/dustractor/repo.svg?style=flat-square
+[forks-shield]: https://img.shields.io/github/forks/dustractor/oblib.svg?style=flat-square
 [forks-url]: https://github.com/dustractor/repo/network/members
-[stars-shield]: https://img.shields.io/github/stars/dustractor/repo.svg?style=flat-square
+[stars-shield]: https://img.shields.io/github/stars/dustractor/oblib.svg?style=flat-square
 [stars-url]: https://github.com/dustractor/repo/stargazers
-[issues-shield]: https://img.shields.io/github/issues/dustractor/repo.svg?style=flat-square
+[issues-shield]: https://img.shields.io/github/issues/dustractor/oblib.svg?style=flat-square
 [issues-url]: https://github.com/dustractor/repo/issues
-[license-shield]: https://img.shields.io/github/license/dustractor/repo.svg?style=flat-square
+[license-shield]: https://img.shields.io/github/license/dustractor/oblib.svg?style=flat-square
 [license-url]: https://github.com/dustractor/repo/blob/master/LICENSE.txt
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: gh-images/screenshot.png
