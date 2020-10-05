@@ -3,7 +3,6 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![GPL3 License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
 
 
 
@@ -14,7 +13,7 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">YOUR_TITLE</h3>
+  <h3 align="center">oblib</h3>
 
   <p align="center">
     YOUR_SHORT_DESCRIPTION
@@ -52,7 +51,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+[![Product Name Screen Shot][product-screenshot]](https://tkit.life)
 
 
 
@@ -115,7 +114,7 @@ Shams Kitz - [@shams13013](https://twitter.com/shams13013) - dustractor@gmail.co
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/dustractor/repo.svg?style=flat-square
+[contributors-shield]: https://img.shields.io/github/contributors/dustractor/oblib.svg?style=flat-square
 [contributors-url]: https://github.com/dustractor/repo/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/dustractor/oblib.svg?style=flat-square
 [forks-url]: https://github.com/dustractor/repo/network/members
